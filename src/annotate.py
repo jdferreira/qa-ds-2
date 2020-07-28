@@ -20,7 +20,7 @@ with open(sys.argv[1]) as f:
 
 annotations = {}
 for key, text in tqdm(data.items()):
-    annotations[key] = merpy.get_entities(text, 'ochv_ncit')
+    annotations[key] = merpy.get_entities(text, 'ochvnncit')
 
 with open(sys.argv[2], 'w') as f:
     json.dump(annotations, f)

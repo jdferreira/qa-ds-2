@@ -38,5 +38,5 @@ python <<EOF
 import merpy
 merpy.process_lexicon('ochv', 'owl')
 merpy.process_lexicon('ncit', 'owl')
-merpy.merge_processed_lexicons(['ochv', 'ncit'], 'ochv_ncit')
+merpy.merge_processed_lexicons(['ochv', 'ncit'], 'ochvnncit')
 EOF

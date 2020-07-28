@@ -4,7 +4,10 @@ URL="https://raw.githubusercontent.com/lasigeBioTM/BiQA/$COMMIT/april2020/medica
 curl "$URL" > data/medicalsciences_202004.csv
 
 # Now get the actual answers, using the stack excehange API
-python src/get_answer_bodies.py data/answers.json
+if [ ! -f data/answers.json ]; then
+# Only get the answers if now already done so
+    python src/get_answer_bodies.py data/answers.json
+fi
 
 if false; then
     # By using Bioportal's API, I can see that the ontologies that better annotate
