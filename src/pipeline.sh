@@ -1,6 +1,6 @@
 # Let's start by grabing the medical sciences dataset
 COMMIT='898378cf9ded103f9b18ce2584723070f50d83c8'
-URL="https://github.com/lasigeBioTM/SciQA/blob/$COMMIT/april2020/medicalsciences_202004.csv"
+URL="https://raw.githubusercontent.com/lasigeBioTM/BiQA/$COMMIT/april2020/medicalsciences_202004.csv"
 curl "$URL" > data/medicalsciences_202004.csv
 
 # Now get the actual answers, using the stack excehange API
