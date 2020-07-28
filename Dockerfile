@@ -8,8 +8,6 @@ COPY requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ /app/src
-COPY data/ /app/data
 COPY bioportal_apikey /app
-RUN bash src/prepare_mer.sh
 
 CMD [ "bash", "src/pipeline.sh" ]

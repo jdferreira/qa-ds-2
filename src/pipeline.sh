@@ -1,38 +1,58 @@
-# Let's start by grabing the medical sciences dataset
-COMMIT='898378cf9ded103f9b18ce2584723070f50d83c8'
-URL="https://raw.githubusercontent.com/lasigeBioTM/BiQA/$COMMIT/april2020/medicalsciences_202004.csv"
-curl "$URL" > data/medicalsciences_202004.csv
+BIOPORTAL_APIKEY="$(cat bioportal_apikey)"
+MER="$(dirname $(python -c 'print(__import__("merpy").__file__)'))/MER"
 
-# Now get the actual answers, using the stack excehange API
-if [ ! -f data/answers.json ]; then
-# Only get the answers if now already done so
+patch_mer() {
+    # MER uses a hard coded set of properties to get labels and synonyms from the
+    # ontologies. Some ontologies use different properties, and as such we must
+    # patch MER to use them as well. In particular, this includes <skos:prefLabel>
+    # and <skos:altLabel>
+
+    # Technical note: The `REPALCE_THIS` text searches for the placeholder text we
+    # wish to find on the text, which is one of the properties used for labels,
+    # optionally followed by the text we wish to add there. We do this to prevent
+    # adding the properties multiple times.
+
+    REPLACE_THIS="-e 'oboInOwl:hasRelatedSynonym' (-e 'skos:prefLabel' -e 'skos:altLabel' )?"
+    WITH_THIS="-e 'oboInOwl:hasRelatedSynonym' -e 'skos:prefLabel' -e 'skos:altLabel' "
+    sed "s/$REPLACE_THIS/$WITH_THIS/" -i "$MER/produce_data_files.sh"
+}
+
+prepare_lexicons() {
+    # Download the necessary ontologies into this directory
+    for ont in ochv ncit; do
+        # Only download if the ontology does not already exist in the data directory
+        if [ ! -f data/"$ont".owl ]; then
+            curl "http://data.bioontology.org/ontologies/${ont^^}/submissions/2/download?apikey=$BIOPORTAL_APIKEY" \
+                -o data/"$ont".owl
+        fi
+
+        # Copy the ontology in the data directory into MER's data directory
+        cp data/"$ont".owl "$MER"/data/"$ont".owl
+    done
+
+    # Let MER process these lexicons, including merging them into a single one.
+    python src/process_lexicons.py 'ochv.owl,ncit.owl' 'whole_lexicon'
+}
+
+get_answers_dataset() {
+    COMMIT='898378cf9ded103f9b18ce2584723070f50d83c8'
+    URL="https://raw.githubusercontent.com/lasigeBioTM/BiQA/$COMMIT/april2020/medicalsciences_202004.csv"
+    curl "$URL" > data/medicalsciences_202004.csv
+
     python src/get_answer_bodies.py data/answers.json
+}
+
+annotate_answers() {
+    # Annotate the answers with these ontologies
+    python src/annotate.py data/answers.json 'whole_lexicon' data/annotations.json
+}
+
+patch_mer
+
+prepare_lexicons
+
+if [ ! -f data/answers.json ]; then
+    get_answers_dataset
 fi
 
-if false; then
-    # By using Bioportal's API, I can see that the ontologies that better annotate
-    # the answers are probably NCIT, OCHV, SNOMEDCT and MESH.
-
-    # To do that, let's grab a few lines of answers, as sending all of them
-    # would not be nice to BioPortal's web service. We'll restrict our request
-    # to the first `N` lines of text
-    N=100
-    jq '.[]' data/answers.json | head -n ${N} > data/${N}_lines_ofanswers.txt
-
-    BIOPORTAL_APIKEY="$(cat bioportal_apikey)"
-    URL='http://data.bioontology.org/recommender'
-    curl $URL \
-        --header 'Authorization: apikey token='"$BIOPORTAL_APIKEY" \
-        --data-urlencode input@data/${N}_lines_ofanswers.txt \
-        -d 'display_context=false' \
-        -d 'display_links=false' \
-        > data/recommendations.json
-
-    # Notice that this block of code is inside a `if false` block, because this
-    # is not strictly needed and I have already run it and determined that the
-    # best ontologies are NCIT, SNOMEDCT, OCHV, RCD and MESH. SNOMED and RCD are
-    # not easily accessible and as such they are ignored for now.
-fi
-
-# Finally, annotate the answers with these ontologies
-python src/annotate.py data/answers.json data/annotations.json
+annotate_answers
