@@ -31,7 +31,7 @@ prepare_lexicons() {
     done
 
     # Let MER process these lexicons, including merging them into a single one.
-    python src/process_lexicons.py 'ochv.owl,ncit.owl' 'whole_lexicon'
+    python src/process_lexicons.py 'ochv.owl,ncit.owl' 'wholelexicon'
 }
 
 get_answers_dataset() {
@@ -44,7 +44,7 @@ get_answers_dataset() {
 
 annotate_answers() {
     # Annotate the answers with these ontologies
-    python src/annotate.py data/answers.json 'whole_lexicon' data/annotations.json
+    python src/annotate.py data/answers.json 'wholelexicon' data/annotations.json
 }
 
 patch_mer
