@@ -7,17 +7,17 @@ BIOPORTAL_APIKEY="$(cat bioportal_apikey)"
 # Find the directory where the ontologies must be included and cd into it
 MER="$(dirname $(python -c 'print(__import__("merpy").__file__)'))/MER"
 
-(
-    # Start a new subshell so that we return back to the current working
-    # directory when this download step is over
-    cd "$MER/data"
+# Download the necessary ontologies into this directory
+for ont in ochv ncit; do
+    # Only download if the ontology does not already exist in the data directory
+    if [ ! -f data/"$ont".owl ]; then
+        curl 'http://data.bioontology.org/ontologies/OCHV/submissions/2/download?apikey='"$BIOPORTAL_APIKEY" \
+            -o data/"$ont".owl
+    fi
 
-    # Download the necessary ontologies into this directory
-    curl 'http://data.bioontology.org/ontologies/OCHV/submissions/2/download?apikey='"$BIOPORTAL_APIKEY" \
-        -o 'ochv.owl'
-    curl 'http://data.bioontology.org/ontologies/NCIT/submissions/2/download?apikey='"$BIOPORTAL_APIKEY" \
-        -o 'ncit.owl'
-)
+    # Copy the ontology in the data directory into MER's data directory
+    cp data/"$ont".owl "$MER"/data/"$ont".owl
+done
 
 # MER uses a hard coded set of properties to get labels and synonyms from the
 # ontologies. Some ontologies use different properties, and as such we must
