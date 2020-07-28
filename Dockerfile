@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ /app/src
 RUN mkdir data
+COPY bioportal_apikey
 RUN bash src/prepare_mer.sh
 
 CMD [ "bash", "src/pipeline.sh" ]
