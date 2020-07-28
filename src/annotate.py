@@ -8,19 +8,19 @@ from tqdm import tqdm
 #
 #   - that the MER's source code is changed, to allow the use of
 #     <skos:prefLabel> and <skos:altLabel> properties (used by OCHV)
-#   - that the OCHV and NCIT ontologies have been loaded as lexicons into MER
-#     with the names 'ochv' and 'ncit'
-#   - that the 'ochv' and 'ncit' lexicons have been merged into the 'ochv_ncit'
-#     lexicon.
+#   - that a lexicon (whose name is given as the third argument) has been
+#     processed by MER
 #
 # The Dockerfile in this repository takes care of that.
 
-with open(sys.argv[1]) as f:
+in_filename, lexicon_name, out_filename = sys.argv[1:]
+
+with open(in_filename) as f:
     data = json.load(f)
 
-annotations = {}
-for key, text in tqdm(data.items()):
-    annotations[key] = merpy.get_entities(text, sys.argv[2])
-
-with open(sys.argv[3], 'w') as f:
-    json.dump(annotations, f)
+with open(out_filename, 'w') as f:
+    for key, text in tqdm(data.items()):
+        annotations = merpy.get_entities(text, lexicon_name)
+        json.dump({key: annotations}, f)
+        f.write('\n')
+        f.flush()
