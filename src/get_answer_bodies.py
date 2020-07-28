@@ -28,7 +28,7 @@ FILTER = API.fetch('filters/create', base='none', include=';'.join(FIELDS))['ite
 
 MS = StackAPI('medicalsciences')
 
-with open('medicalsciences_202004.csv') as f:
+with open('data/medicalsciences_202004.csv') as f:
     data = list(csv.DictReader(f))
 
 answer_ids = {
