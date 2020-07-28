@@ -16,7 +16,7 @@ if false; then
     N=100
     jq '.[]' data/answers.json | head -n ${N} > data/${N}_lines_ofanswers.txt
 
-    BIOPORTAL_APIKEY="$(echo bioportal_apikey)"
+    BIOPORTAL_APIKEY="$(echo ../bioportal_apikey)"
     URL='http://data.bioontology.org/recommender'
     curl $URL \
         --header 'Authorization: apikey token='"$BIOPORTAL_APIKEY" \
