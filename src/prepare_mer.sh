@@ -1,4 +1,4 @@
-BIOPORTAL_APIKEY="$(echo ../bioportal_apikey)"
+BIOPORTAL_APIKEY="$(cat bioportal_apikey)"
 
 # We need to convince MER to do what we want with the ontologies. In particular,
 # we must create the lexicons and patch the MER scripts to recognize the label
